@@ -100,12 +100,25 @@ function draw(){
 function keyPressed() {
   switch (keyCode) {
     case LEFT_ARROW:
-      player1.setHorizontalAcceleration(-0.4);
+      player2.setHorizontalAcceleration(-0.4);
       break;
     case RIGHT_ARROW:
-      player1.setHorizontalAcceleration(0.4);
+      player2.setHorizontalAcceleration(0.4);
       break;
     case UP_ARROW: 
+      player2.jump();
+      break; 
+    case ENTER: // 32 is the keyCode for the spacebar 
+      player2.shootBall(); 
+      player2.foot_animator.play('shoot'); 
+      break; 
+    case 'A'.charCodeAt(0):
+      player1.setHorizontalAcceleration(-0.4);
+      break;
+    case 'D'.charCodeAt(0):
+      player1.setHorizontalAcceleration(0.4);
+      break;
+    case 'W'.charCodeAt(0): 
       player1.jump();
       break; 
     case 32: // 32 is the keyCode for the spacebar 
@@ -118,16 +131,19 @@ function keyPressed() {
 
  }
 
- function stopPlayerMovement() {
-  player1.setHorizontalAcceleration(0);
-  player1.setSpeedX(0);
-}
 
 function keyReleased() {
   player1.player_animator.stop()
+  player2.player_animator.stop()
   if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW) {
-    stopPlayerMovement();  
+    player2.setHorizontalAcceleration(0);
+    player2.setSpeedX(0);
   } 
+
+  if(keyCode === 'A'.charCodeAt(0) || keyCode === 'D'.charCodeAt(0)){
+    player1.setHorizontalAcceleration(0);
+    player1.setSpeedX(0);
+  }
 }
 
 

@@ -72,26 +72,50 @@ class Player {
         scale: 1
       })
 
-      this.foot_animator.addKeyFrame('shoot', {
-        time: 0,
-        rotation: 0,
-        scale: 1
-      }).addKeyFrame('shoot', {
-        time: 150,
-        position: createVector(0, 0),
-        rotation: -PI/3.5,
-        scale: 1
-      })
-      .addKeyFrame('shoot', {
-        time: 180,
-        rotation: -PI/10,
-        scale: 1
-      })
-      .addKeyFrame('shoot', {
-        time: 370,
-        rotation: 0,
-        scale: 1
-      })
+      if(this.playerName == 'player1'){
+        this.foot_animator.addKeyFrame('shoot', {
+          time: 0,
+          rotation: 0,
+          scale: 1
+        }).addKeyFrame('shoot', {
+          time: 150,
+          position: createVector(0, 0),
+          rotation: -PI/3.5,
+          scale: 1
+        })
+        .addKeyFrame('shoot', {
+          time: 180,
+          rotation: -PI/10,
+          scale: 1
+        })
+        .addKeyFrame('shoot', {
+          time: 370,
+          rotation: 0,
+          scale: 1
+        })
+      }else{
+        this.foot_animator.addKeyFrame('shoot', {
+          time: 0,
+          rotation: 0,
+          scale: 1
+        }).addKeyFrame('shoot', {
+          time: 150,
+          position: createVector(0, 0),
+          rotation: PI/3.5,
+          scale: 1
+        })
+        .addKeyFrame('shoot', {
+          time: 180,
+          rotation: PI/10,
+          scale: 1
+        })
+        .addKeyFrame('shoot', {
+          time: 370,
+          rotation: 0,
+          scale: 1
+        })
+      }
+      
 
 
       this.head_animator.addKeyFrame('shoot', {
@@ -236,6 +260,8 @@ class Player {
     }
   
     shootBall(shoot_angle = PI/3){
+      if(this.playerName == 'player2') shoot_angle = PI - shoot_angle;
+
       if (this.footCollider.inCollision(this.ball.collider)) {     //ball is in field for shoot
         console.log("SHOOT")
 

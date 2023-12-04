@@ -10,22 +10,281 @@
 
     <script src="libraries/p5.min.js"></script>
     <!-- <script src="libraries/p5.sound.min.js"></script> -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/addons/p5.sound.min.js"></script>
+
+
+    <!-- SERVER RUNNABLE-->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/p5.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/p5@1.4.2/lib/addons/p5.sound.js"></script>
+    <script src="https://unpkg.com/@free-side/audioworklet-polyfill/dist/audioworklet-polyfill.js"></script> -->
+    
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
   </head>
 
   <body>
+    
+
+    <div class="canvas-container">
+      <canvas id="myCanvas"></canvas>
+      <!-- Here will be inserted elements overlaying the canvas -->
+
+
+      <div class="container py-3" id="playerSelectionTable" style="display: none;">
+        <div class="row">
+            <div class="col-lg-6 mx-auto bg-gray rounded shadow" style="top: 100px; z-index: 3;">
+
+                <!-- Fixed header table-->
+                <div class="table-responsive">
+                    <table class="table table-fixed">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="col-4">Avatar</th>
+                                <th scope="col" class="col-4">Name</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersTableBody">
+
+                            <!-- Example table row-->
+                             <!-- 
+                            <tr>
+                                <th scope="row" class="col-4">
+                                  <img src="soccer asseets/head2.png" alt="Avatar 1" width="30" height="30">
+                                </th>
+                                <td class="col-4">Bojana</td>
+                                <td class="col-4">
+                                  <button type="button" class="btn btn-light">Select</button>
+                                </td>
+                            </tr>
+                          -->
+                            
+                        </tbody>
+                    </table>
+                </div><!-- End -->
+                
+            </div>
+        </div>
+      </div>
+
+
+
+
+      <div class="container py-3" id="playerResultsTable" style="display: none;">
+        <div class="row">
+            <div class="col-lg-6 mx-auto bg-gray rounded shadow" style="top: 100px; z-index: 3;">
+
+                <!-- Fixed header table-->
+                <div class="table-responsive">
+                    <table class="table table-fixed">
+                        <thead>
+                            <tr>
+                                <th scope="col" class="col-3">Avatar</th>
+                                <th scope="col" class="col-3">Name</th>
+                                <th scope="col" class="col-2">Wins</th>
+                                <th scope="col" class="col-2">Losses</th>
+                                <th scope="col" class="col-2">Draws</th>
+                            </tr>
+                        </thead>
+                        <tbody id="playersResultsTableBody">
+
+                            <!-- Example table row-->
+                            <!-- <tr>
+                                <th scope="row" class="col-3">
+                                  <img src="soccer asseets/head2.png" alt="Avatar 1" width="10" height="10">
+                                </th>
+                                <td class="col-3">Bojana</td>
+                                <td class="col-2">23</td>
+                                <td class="col-2">3</td>
+                                <td class="col-2">0</td>
+                            </tr> -->
+                            
+                        </tbody>
+                    </table>
+                </div><!-- End -->
+                
+            </div>
+        </div>
+      </div>
+     
+
+      
+
+
+
+    </div>  
+    
+    
+    
+    
+
+
+    
+    
+    <!-- Pause Modal -->
+    <style>
+      /* Change the background color of the modal */
+      .modal-content {
+        background-color: #c8c8c8c7; /* Gray color */
+      }
+
+      @font-face {
+        font-family: 'YourCustomFont';
+        src: url('fonts/KGSummerSunshineBlackout.ttf') format('truetype'); /* Adjust the path accordingly */
+        /* You can include other font formats and paths here for cross-browser compatibility */
+      }
+
+      /* Apply the custom font to the modal title */
+      .modal-title {
+        font-family: 'YourCustomFont', Arial, sans-serif;
+      }
+
+      .modal-body {
+        font-family: 'YourCustomFont', Arial, sans-serif;
+      }
+
+    </style>
+
+    
+    <div class="modal fade" id="pauseModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Pause</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close" id="closeButton">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Do you want to continue?
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-light" data-dismiss="modal" id="mainMenuButton">Main menu</button>
+            <button type="button" class="btn btn-light" data-dismiss="modal" id="replayButton">Replay</button>
+            <button type="button" class="btn btn-success" id="continueButton">Continue</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+
+
+
+    <!-- Player names conflict Modal -->
+    <div class="modal fade" id="playerNameConflictModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Player with given username already exists!</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            Please insert another name
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">OK</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+
+
+
     <script src="Game.js"></script>
-    <script src="player.js"></script>
-    <script src="ball.js"></script>
-    <script src="collider.js"></script>
-    <script src="rectCollider.js"></script>
-    <script src="circleCollider.js"></script>
-    <script src="terrain.js"></script>
-    <script src="goalPost.js"></script>
-    <script src="LayerManager.js"></script>
-    <script src="KeyFrame.js"></script>
-    <script src="Animator.js"></script>
-    <script src="Score.js"></script>
-    <script src="trailEffect.js"></script>
-    <script src="postProcessing .js"></script>
+
+    <script src="GameObjects/Players/player.js"></script>
+    <script src="GameObjects/Players/FastPlayer.js"></script>
+    <script src="GameObjects/Players/JumpyPlayer.js"></script>
+    <script src="GameObjects/Players/EndurantPlayer.js"></script>
+    <script src="GameObjects/Players/StrongPlayer.js"></script>
+    <script src="GameObjects/Ball/ball.js"></script>
+    <script src="GameObjects/Ball/trailEffect.js"></script>
+    <script src="GameObjects/Terrains/terrain.js"></script>
+    <script src="GameObjects/Terrains/CityTerrain.js"></script>
+    <script src="GameObjects/Terrains/RainTerrain.js"></script>
+    <script src="GameObjects/Terrains/NightTerrain.js"></script>
+    <script src="GameObjects/goalPost.js"></script>
+    <script src="GameObjects/Score.js"></script>
+    <script src="GameObjects/Fan.js"></script>
+
+    <script src="Modals/PauseModal.js"></script>
+    <script src="Modals/PlayerNameConflictModal.js"></script>
+    <script src="Modals/RegisterPlayerModal.js"></script>
+
+    <script src="Engine/LayerManager.js"></script>
+    <script src="Engine/postProcessing .js"></script>
+    <script src="Engine/Colliders/collider.js"></script>
+    <script src="Engine/Colliders/rectCollider.js"></script>
+    <script src="Engine/Colliders/circleCollider.js"></script>
+    <script src="Engine/SoundManager.js"></script>
+
+    <script src="Engine/Animation/KeyFrame.js"></script>
+    <script src="Engine/Animation/Animator.js"></script>
+
+    <script src="Scenes/Scene.js"></script>
+    <script src="Scenes/MainMenuScene.js"></script>
+    <script src="Scenes/SceneManager.js"></script>
+    <script src="Scenes/GameScene1.js"></script>
+    <script src="Scenes/PreMatchScene.js"></script>
+    <script src="Scenes/SettingsScene.js"></script>
+    <script src="Scenes/ResultsScene.js"></script>
+    <script src="Scenes/AboutScene.js"></script>
+    <script src="Scenes/MatchEndScene.js"></script>
+    <script src="Scenes/ControlsScene.js"></script>
+    <script src="Scenes/RegisterPlayerScene.js"></script>
+    <script src="Scenes/PlayerSelectionScene.js"></script>
+    <script src="Scenes/LoadScene.js"></script>
+
+    <script src="Modifiers/Modifier.js"></script>
+    <script src="Modifiers/ModifierManager.js"></script>
+    <script src="Modifiers/FreezeModifier.js"></script>
+    <script src="Modifiers/BigPlayerModifier.js"></script>
+    <script src="Modifiers/FireBallModifier.js"></script>
+    <script src="Modifiers/LevitatingPlayerModifier.js"></script>
+
+
+    <script src="Pickups/Pickup.js"></script>
+    <script src="Pickups/PickupActivator.js"></script>
+    <script src="Pickups/Powerups/Powerup.js"></script>
+    <script src="Pickups/EnergyPickups/Coin.js"></script>
+    <script src="Pickups/EnergyPickups/Diamond.js"></script>
+    <script src="Pickups/Powerups/BigPlayerPowerup.js"></script>
+    <script src="Pickups/Powerups/FanPowerup.js"></script>
+    <script src="Pickups/Powerups/FreezePowerup.js"></script>
+    <script src="Pickups/Powerups/RocketPowerup.js"></script>
+    <script src="Pickups/ItemCollection.js"></script>
+    
+    
+    <script src="Engine/ParticleSystem/Particle.js"></script>
+    <script src="Engine/ParticleSystem/ParticleSource.js"></script>
+    <script src="Engine/ParticleSystem/RectangularSource.js"></script>
+    <script src="Engine/ParticleSystem/EllipticalSource.js"></script>
+    <script src="Engine/ParticleSystem/ParticleEmitter.js"></script>
+    <script src="Engine/ParticleSystem/ParticleSystem.js"></script>
+    <script src="Engine/ParticleSystem/ParticleSystemManager.js"></script>
+    <script src="Engine/ParticleSystem/IceParticle.js"></script>
+    <script src="Engine/ParticleSystem/RocketParticle.js"></script>
+    <script src="Engine/ParticleSystem/ParticlePool.js"></script>
+    <script src="Engine/ParticleSystem/RocketParticleSystem.js"></script>
+    <script src="Engine/ParticleSystem/GlowParticle.js"></script>
+    <script src="Engine/ParticleSystem/GlowParticleSystem.js"></script>
+    <script src="Engine/ParticleSystem/AirParticle.js"></script>
+    <script src="Engine/ParticleSystem/AirParticleSystem.js"></script>
+    <script src="Engine/ParticleSystem/DirtParticles.js/DirtParticle.js"></script>
+    <script src="Engine/ParticleSystem/DirtParticles.js/DirtParticle1.js"></script>
+    <script src="Engine/ParticleSystem/DirtParticles.js/DirtParticleSystem.js"></script>
+    <script src="Engine/ParticleSystem/RainParticleSystem/RainParticle.js"></script>
+    <script src="Engine/ParticleSystem/RainParticleSystem/RainParticle1.js"></script>
+    <script src="Engine/ParticleSystem/RainParticleSystem/RainParticleSystem.js"></script>
+    <script src="Engine/ParticleSystem/RainParticleSystem/ShowerRainParticleSystem.js"></script>
   </body>
 </html>

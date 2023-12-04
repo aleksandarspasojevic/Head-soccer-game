@@ -1,149 +1,164 @@
-let TERRAIN_IMG, BALL_IMG, PLAYER1_HEAD_IMG, PLAYER1_FOOT_IMG,
-GOALPOST_LEFT1_IMG, GOALPOST_LEFT2_IMG, GOALPOST_RIGHT1_IMG,
-GOALPOST_RIGHT2_IMG, PLAYER2_HEAD_IMG, PLAYER2_FOOT_IMG,
-PLAYER1_BODY_IMG, PLAYER2_BODY_IMG, SCORE_IMG;
-
-let ball, goalpost_left, goalpost_right, terrain, score, trail_effect;
-let player1, player2;
-let layer_manager;
-let ssd_font;
-let post_processing;
 
 let WIDTH, HEIGHT;    //canvas dimensions
 
-PLAYER_SPEED = 4
-PLAYER_SHOOT_INTENSITY = 10
-GRAVITY = .5 
+let pauseModal, playerNameConflictModal;
+let soundManager;
+let goal_font;
+let ssd_font;
+let deltatime 
+
+let globalSettings, playersData;
 
 function preload() {
-  // Load the images
-  TERRAIN_IMG = loadImage('soccer asseets/playground.jpg');
-  BALL_IMG = loadImage('soccer asseets/ball1.png');
-  PLAYER1_HEAD_IMG = loadImage('soccer asseets/head1.png');
-  PLAYER1_BODY_IMG = loadImage('soccer asseets/body1.png');
-  PLAYER1_FOOT_IMG = loadImage('soccer asseets/foot1.png');
-  PLAYER2_HEAD_IMG = loadImage('soccer asseets/head2.png');
-  PLAYER2_BODY_IMG = loadImage('soccer asseets/body2.png');
-  PLAYER2_FOOT_IMG = loadImage('soccer asseets/foot2.png');
-  GOALPOST_LEFT1_IMG = loadImage('soccer asseets/goalpost_left1.png');
-  GOALPOST_LEFT2_IMG = loadImage('soccer asseets/goalpost_left2.png');
-  GOALPOST_RIGHT1_IMG = loadImage('soccer asseets/goalpost_right1.png');
-  GOALPOST_RIGHT2_IMG = loadImage('soccer asseets/goalpost_right2.png');
-  SCORE_IMG = loadImage('soccer asseets/score.png');
+  // Load the resources
   ssd_font = loadFont('fonts/Digital-7.ttf');
   goal_font = loadFont('fonts/KGSummerSunshineBlackout.ttf');
+  globalSettings = loadJSON('config/global_settings.json');
+
 }
 
 
-
 function setup() {
-  goalpost_left = new GoalPost(-360, 75, 33, [GOALPOST_LEFT1_IMG, GOALPOST_LEFT2_IMG]);
-  goalpost_right = new GoalPost(360, 75, 33, [GOALPOST_RIGHT1_IMG, GOALPOST_RIGHT2_IMG]);
-  terrain = new Terrain(TERRAIN_IMG);
-  ball = new Ball(0, 0, 11, BALL_IMG, terrain, goalpost_left, goalpost_right);
-  player1 = new Player(-180, 110, 25, {
-    'head': {'img' : PLAYER1_HEAD_IMG, 'img_pos': createVector(0, -10)},
-    'body': {'img' : PLAYER1_BODY_IMG, 'img_pos': createVector(-5, 15)},
-    'foot': {'img' : PLAYER1_FOOT_IMG, 'img_pos': createVector(4, 26)}
-  },
-  terrain, ball, "player1");
+  sceneManager = new SceneManager();
 
-  player2 = new Player(180, 110, 25, {
-    'head': {'img' : PLAYER2_HEAD_IMG, 'img_pos': createVector(0, -10)},
-    'body': {'img' : PLAYER2_BODY_IMG, 'img_pos': createVector(6, 11)},
-    'foot': {'img' : PLAYER2_FOOT_IMG, 'img_pos': createVector(-4, 26)}
-  },
-  terrain, ball, "player2");
-  score = new Score(SCORE_IMG)
-  trail_effect = new TrailEffect(ball, 40, ball.size*2.5)
-  post_processing = new PostProcessing()
- 
-  // Create a canvas that matches the size of the image
-  WIDTH = TERRAIN_IMG.width;
-  HEIGHT = TERRAIN_IMG.height;
-  createCanvas(WIDTH/2, HEIGHT/2);
-  imageMode(CENTER);
+  (async () => {
+    await sceneManager.addScene(new GameScene1());
+    await sceneManager.addScene(new MainMenuScene());
+    await sceneManager.addScene(new PreMatchScene());
+    await sceneManager.addScene(new SettingsScene());
+    await sceneManager.addScene(new ResultsScene());
+    await sceneManager.addScene(new AboutScene());
+    await sceneManager.addScene(new MatchEndScene());
+    await sceneManager.addScene(new ControlsScene());
+    await sceneManager.addScene(new RegisterPlayerScene());
+    await sceneManager.addScene(new PlayerSelectionScene());
+    await sceneManager.addScene(new LoadScene());
+    // await sceneManager.showScene("MainMenuScene");
+    await sceneManager.showScene("LoadScene");
+  })();
 
-  layer_manager = new LayerManager();
-  
+  document.addEventListener('visibilitychange', handleVisibilityChange);
+  pauseModal = new PauseModal();
+  playerNameConflictModal = new PlayerNameConflictModal();
+
+  initialSaveData('global_settings', globalSettings);        //Save if initially doesnt exist in Local memory
+  initialSaveData('players_data', []);
+  globalSettings = retrieveData('global_settings');
+  playersData = retrieveData('players_data');
+
+  //globalSetting and playerData are pulled from local storage
+
+  // soundManager.setGlobalSoundLevel(globalSettings.backgroundVolume);
+  // soundManager.setEffectsSoundLevel(globalSettings.effectsVolume);
+  // if(globalSettings.mutedBackgroundVolume) soundManager.setGlobalSoundLevel(0);   //mute
+  // if(globalSettings.mutedEffectsVolume) soundManager.setEffectsSoundLevel(0);
+
+
+  //Delete all stored players 
+  // deleteData('players_data');
+  // initialSaveData('players_data', []);
+
+  console.log(playersData)
 }
 
 
 function draw(){
   clear();
   translate(WIDTH/4, HEIGHT/4);
-  
-  //update funcions
-  ball.update(terrain, player1, player2);
-  player1.update(terrain, ball);
-  player2.update(terrain, ball);
-  goalpost_left.update();
-  goalpost_right.update();
-  trail_effect.update()
-  score.update()
 
-  //render functions
-  terrain.show();
-  goalpost_left.show();
-  goalpost_right.show();
-  player1.show();
-  player2.show();
-  ball.show();
-  score.show();
-  trail_effect.show()
-  post_processing.show()
-  
-  layer_manager.displayLayers();
+  //after pausing the game, the first frame time goes incredibly low
+  if(deltaTime/1000 > 1/20) 
+    deltatime = 1/1000;
+  else
+    deltatime  = deltaTime * 60 / 1000;
+
+  sceneManager.update();
+  sceneManager.display();
+
 }
 
 
-function keyPressed() {
-  switch (keyCode) {
-    case LEFT_ARROW:
-      player2.setHorizontalAcceleration(-0.4);
-      break;
-    case RIGHT_ARROW:
-      player2.setHorizontalAcceleration(0.4);
-      break;
-    case UP_ARROW: 
-      player2.jump();
-      break; 
-    case ENTER: // 32 is the keyCode for the spacebar 
-      player2.shootBall(); 
-      player2.foot_animator.play('shoot'); 
-      break; 
-    case 'A'.charCodeAt(0):
-      player1.setHorizontalAcceleration(-0.4);
-      break;
-    case 'D'.charCodeAt(0):
-      player1.setHorizontalAcceleration(0.4);
-      break;
-    case 'W'.charCodeAt(0): 
-      player1.jump();
-      break; 
-    case 32: // 32 is the keyCode for the spacebar 
-      player1.shootBall(); 
-      player1.foot_animator.play('shoot'); 
-      break; 
-    default:   // no default action  
-
-  }  
-
- }
-
-
-function keyReleased() {
-  player1.player_animator.stop()
-  player2.player_animator.stop()
-  if (keyCode === LEFT_ARROW || keyCode === RIGHT_ARROW) {
-    player2.setHorizontalAcceleration(0);
-    player2.setSpeedX(0);
-  } 
-
-  if(keyCode === 'A'.charCodeAt(0) || keyCode === 'D'.charCodeAt(0)){
-    player1.setHorizontalAcceleration(0);
-    player1.setSpeedX(0);
+function handleVisibilityChange() {
+  if(!soundManager) return;
+  
+  if (document.hidden) {
+    // noLoop();
+    if(sceneManager.getActiveSceneName() == "GameScene1")
+      pauseModal.showModal();
+      soundManager.pausePlayingCurrentBackgroundSound();
+  } else {
+    // The user switched back to the tab
+    // You can resume your game or do something else here
+    console.log('User switched back to the tab');
+    soundManager.continuePlayingCurrentBackgroundSound();
   }
 }
 
 
+document.addEventListener('keydown', function(event) {
+  sceneManager.keyPressed(event); // Forward the keyPressed event to the active scene
+});
+
+document.addEventListener('keyup', function(event) {
+  sceneManager.keyReleased(event); // Forward the keyReleased event to the active scene
+});
+
+document.addEventListener('mousedown', function(event) {
+  sceneManager.mousePressed(event); // Forward the mousePressed event to the active scene
+});
+
+
+function initialSaveData(name, data){
+
+  if (!localStorage.getItem(name)) {
+    localStorage.setItem(name, JSON.stringify(data));
+    // console.log('Data saved:', data);
+  } else {
+    // console.log('Data already exists in localStorage:', JSON.parse(localStorage.getItem(name)));
+  }
+
+}
+
+
+function saveData(name, data) {
+  // let data = { score: 180, playerName: 'Alekasandar' };
+  localStorage.setItem(name, JSON.stringify(data));
+  // console.log('Data saved:', data);
+}
+
+function deleteData(name){
+  localStorage.removeItem(name);
+}
+
+function retrieveData(name) {
+  let savedData = JSON.parse(localStorage.getItem(name));
+  // console.log('Data retrieved:', savedData);
+  return savedData;
+}
+
+
+function getImageSrcForPlayerType(avatar_type){
+  let src = "soccer asseets/head1.png";
+  switch (avatar_type) {
+    case "FAST_PLAYER":
+      src = "soccer asseets/player_icons/head1.png";
+    break;
+
+    case "JUMPY_PLAYER":
+      src = "soccer asseets/player_icons/head2.png";
+    break;
+
+    case "ENDURANT_PLAYER":
+      src = "soccer asseets/player_icons/head4.png";
+    break;
+    
+    case "STRONG_PLAYER":
+      src = "soccer asseets/player_icons/head3.png";
+    break;
+
+    default:
+    break;
+  }
+
+  return src;
+}
